@@ -5,6 +5,7 @@ import { BACKEND_URI } from "../config/constants";
 const UploadForm = ({ getAllMedias }) => {
   const [name, setName] = useState("");
   const [videos, setVideos] = useState([]);
+  const [upload, setUpload] = useState(null);
 
   // handleSubmit
   const handleSubmit = (e) => {
@@ -19,7 +20,11 @@ const UploadForm = ({ getAllMedias }) => {
 
     //  api call 👍
     axios
-      .post(`${BACKEND_URI}/api/v1/media/create`, formData)
+      .post(`${BACKEND_URI}/api/v1/media/create`, formData, {
+        onUploadProgress: (data) => {
+          setUpload(Math.round((data.loaded / data.total) * 100));
+        },
+      })
       .then((res) => {
         getAllMedias();
         alert(`Submitted successful!`);
@@ -29,6 +34,8 @@ const UploadForm = ({ getAllMedias }) => {
         alert(`Error happened!`);
       });
   };
+
+  console.log("upload is ", upload);
 
   return (
     <div>
@@ -51,6 +58,21 @@ const UploadForm = ({ getAllMedias }) => {
             onChange={(e) => setVideos(e.target.files)}
           />
         </div>
+
+        {upload && (
+          <div className="progress mt-2">
+            <div
+              className="progress-bar"
+              role="progressbar"
+              aria-valuenow={upload}
+              aria-valuemin="0"
+              aria-valuemax="100"
+              style={{ width: `${upload}%` }}
+            >
+              {`${upload}%`}
+            </div>
+          </div>
+        )}
 
         <button type="submit" className="btn btn-primary mt-2">
           Submit
